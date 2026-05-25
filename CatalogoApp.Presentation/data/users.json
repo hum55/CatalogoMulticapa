@@ -1,0 +1,42 @@
+[
+  {
+    "Id": 1,
+    "Nombre": "Jorge Pedrozo",
+    "Email": "jorge@correo.com",
+    "Password": "abc123",
+    "Role": "User",
+    "UltimoLogin": "2026-05-24T08:25:38.9010087-06:00",
+    "UltimoLogout": "2026-05-24T08:25:38.9923074-06:00",
+    "VecesIngreso": 3
+  },
+  {
+    "Id": 2,
+    "Nombre": "Javier",
+    "Email": "javier@correo.com",
+    "Password": "123qwe",
+    "Role": "User",
+    "UltimoLogin": null,
+    "UltimoLogout": null,
+    "VecesIngreso": 0
+  },
+  {
+    "Id": 3,
+    "Nombre": "hu",
+    "Email": "humberto.ramirez@tecdesoftware.edu.mx",
+    "Password": "hth",
+    "Role": "User",
+    "UltimoLogin": "2026-05-24T08:12:52.23364-06:00",
+    "UltimoLogout": "2026-05-24T08:14:33.6428768-06:00",
+    "VecesIngreso": 1
+  },
+  {
+    "Id": 4,
+    "Nombre": "humbert",
+    "Email": "hr4320352@gmail.com",
+    "Password": "wFXaguwfT1OIUlJ8weXXTg==.iNHaHul6RhlhKzEGrdXeFks26WXpdTnBmz020ME3S3M=",
+    "Role": "Admin",
+    "UltimoLogin": "2026-05-24T19:02:19.6526993-06:00",
+    "UltimoLogout": "2026-05-24T08:58:56.153591-06:00",
+    "VecesIngreso": 8
+  }
+]

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CatalogoApp.Aplication/CatalogoApp.Application.csproj" />
+  <Project Path="CatalogoApp.Domain/CatalogoApp.Domain.csproj" />
+  <Project Path="CatalogoApp.Infrastructure/CatalogoApp.Infrastructure.csproj" />
+  <Project Path="CatalogoApp.Presentation/CatalogoApp.Presentation.csproj" />
+</Solution>

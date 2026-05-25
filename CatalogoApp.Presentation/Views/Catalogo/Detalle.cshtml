@@ -1,0 +1,395 @@
+@model CatalogoApp.Domain.Models.Item
+@using CatalogoApp.Domain.Models
+@{
+    ViewData["Title"] = Model.Nombre;
+    Layout = null;
+    var reviews = ViewBag.Reviews as List<Review> ?? new List<Review>();
+    int? userId = ViewBag.UserId as int?;
+    string userRole = ViewBag.UserRole as string ?? "";
+    bool hasPhoto = !string.IsNullOrWhiteSpace(Model.FotoDetalleUrl) || !string.IsNullOrWhiteSpace(Model.FotoUrl);
+    string photoSrc = !string.IsNullOrWhiteSpace(Model.FotoDetalleUrl) ? Model.FotoDetalleUrl : Model.FotoUrl;
+    string photoPos = !string.IsNullOrWhiteSpace(Model.FotoDetalleUrl) && !string.IsNullOrWhiteSpace(Model.FotoDetallePosition) ? Model.FotoDetallePosition
+                     : !string.IsNullOrWhiteSpace(Model.FotoPosition) ? Model.FotoPosition : "center center";
+    double avgRating = reviews.Any() ? reviews.Average(r => r.Calificacion) : 0;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Nombre - Detalle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #060a13;
+            --surface: #0d1526;
+            --surface-2: #111d30;
+            --gold: #d4a017;
+            --gold-light: #f0d060;
+            --gold-dim: rgba(212,160,23,0.15);
+            --red: #c41e3a;
+            --white: #ffffff;
+            --gray: #b0b8c8;
+            --gray-dim: rgba(176,184,200,0.4);
+            --cyan: #00d4ff;
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-heading: 'Oswald', sans-serif;
+            --font-body: 'Barlow', sans-serif;
+            --font-condensed: 'Barlow Condensed', sans-serif;
+        }
+        body {
+            background: var(--bg);
+            color: var(--white);
+            font-family: var(--font-body);
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(26,115,232,0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 30%, rgba(212,160,23,0.04) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 32px;
+            background: linear-gradient(180deg, rgba(6,10,19,0.95), rgba(6,10,19,0.7));
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(212,160,23,0.08);
+        }
+        .topbar-links { display: flex; gap: 8px; }
+        .top-link {
+            color: var(--gold);
+            border: 1px solid rgba(212,160,23,0.2);
+            background: rgba(6,8,16,0.5);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 10px;
+            padding: 8px 16px;
+            transition: .3s ease;
+            font-family: var(--font-condensed);
+            font-weight: 600;
+        }
+        .top-link:hover { border-color: var(--gold); color: var(--white); background: rgba(212,160,23,0.1); }
+        .top-link.danger { color: #ff6b6b; border-color: rgba(255,107,107,0.3); }
+        .top-link.danger:hover { background: rgba(255,107,107,0.1); border-color: #ff6b6b; }
+
+        .page { max-width: 960px; margin: 0 auto; padding: 80px 24px 48px; position: relative; z-index: 1; }
+
+        .hero-card {
+            background: linear-gradient(160deg, var(--surface), var(--surface-2));
+            border: 1px solid rgba(212,160,23,0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(212,160,23,0.04);
+            animation: fadeUp .6s ease;
+        }
+        @@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hero { display: flex; flex-wrap: wrap; gap: 32px; padding: 40px; align-items: center; }
+
+        .photo-section { flex: 0 0 280px; }
+        .photo-frame {
+            width: 260px; height: 320px; margin: 0 auto;
+            border-radius: 16px;
+            border: 1px solid rgba(212,160,23,0.12);
+            overflow: hidden;
+            position: relative;
+            background: radial-gradient(circle at 50% 60%, rgba(0,212,255,0.06), transparent 60%);
+        }
+        .photo-frame img {
+            width: 100%; height: 100%; object-fit: cover; object-position: center top;
+            filter: contrast(1.05) brightness(0.92);
+        }
+        .photo-frame::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(6,10,19,0.6));
+            pointer-events: none;
+        }
+        .photo-placeholder {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .photo-placeholder svg { width: 120px; height: 200px; fill: rgba(0,212,255,0.1); }
+
+        .info-section { flex: 1; min-width: 280px; }
+        .flag-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .flag { font-size: 14px; letter-spacing: 2px; color: var(--gold); font-family: var(--font-condensed); font-weight: 600; }
+        .country { font-family: var(--font-condensed); font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+        .player-name {
+            font-family: var(--font-display); font-size: clamp(38px,5vw,56px);
+            letter-spacing: 2px; text-transform: uppercase; line-height: 1; margin-bottom: 10px;
+            background: linear-gradient(180deg, #fff 30%, var(--gold-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .pos-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, var(--red), #8b1528);
+            border-radius: 6px; padding: 5px 14px;
+            font-family: var(--font-condensed); font-size: 13px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;
+        }
+        .rating-display { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .rating-stars { color: var(--gold-light); font-size: 18px; letter-spacing: 2px; }
+        .rating-text { font-size: 13px; color: var(--gray); font-family: var(--font-condensed); letter-spacing: 1px; }
+
+        .specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+        .spec {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px; padding: 14px 10px; text-align: center;
+            transition: .3s;
+        }
+        .spec:hover { border-color: rgba(212,160,23,0.25); transform: translateY(-2px); }
+        .spec-val { font-family: var(--font-display); font-size: 22px; color: var(--gold-light); }
+        .spec-lbl { font-family: var(--font-condensed); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-top: 2px; }
+
+        .content-section { padding: 0 40px 32px; }
+        .sec-title {
+            font-family: var(--font-heading); font-size: 15px; font-weight: 600;
+            letter-spacing: 4px; text-transform: uppercase; color: var(--gold);
+            margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+        }
+        .sec-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(212,160,23,0.25), transparent); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+        .stat {
+            background: linear-gradient(135deg, var(--gold-dim), rgba(212,160,23,0.03));
+            border: 1px solid rgba(212,160,23,0.1); border-radius: 12px;
+            padding: 20px; text-align: center; transition: .3s;
+        }
+        .stat:hover { border-color: rgba(212,160,23,0.3); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        .stat-num { font-family: var(--font-display); font-size: 40px; color: var(--gold-light); line-height: 1; }
+        .stat-name { font-family: var(--font-condensed); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--gray); margin-top: 6px; }
+
+        .clubs-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+        .club-tag {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px; padding: 6px 16px;
+            font-family: var(--font-condensed); font-size: 13px; letter-spacing: 1px; color: var(--gray);
+            transition: .3s;
+        }
+        .club-tag:hover { border-color: rgba(0,212,255,0.3); color: var(--cyan); }
+
+        .bio { font-size: 15px; line-height: 1.8; color: var(--gray); font-weight: 300; margin-bottom: 28px; }
+
+        .reviews-list { display: grid; gap: 10px; margin-bottom: 18px; }
+        .review-item { border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; }
+        .review-top { display: flex; justify-content: space-between; align-items: center; }
+        .review-user { font-family: var(--font-condensed); font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+        .review-stars { color: var(--gold-light); font-size: 14px; letter-spacing: 2px; }
+        .review-text { margin-top: 6px; color: var(--gray); line-height: 1.6; font-size: 14px; }
+        .review-date { font-size: 11px; color: var(--gray-dim); margin-top: 4px; }
+        .no-reviews { color: var(--gray-dim); font-size: 14px; padding: 16px 0; }
+
+        .review-form { display: grid; gap: 10px; margin-bottom: 24px; }
+        .review-form textarea {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; color: var(--white); padding: 12px;
+            font-family: var(--font-body); font-size: 14px; min-height: 70px; resize: vertical; outline: none;
+        }
+        .review-form textarea:focus { border-color: rgba(212,160,23,0.4); }
+        .rating-ctrl { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; padding: 4px 0; }
+        .rating-ctrl input { position: absolute; opacity: 0; pointer-events: none; }
+        .rating-ctrl label { color: rgba(255,255,255,0.18); cursor: pointer; font-size: 26px; line-height: 1; transition: .2s; }
+        .rating-ctrl label:hover, .rating-ctrl label:hover ~ label, .rating-ctrl input:checked ~ label { color: var(--gold-light); }
+        .rating-ctrl label:hover { transform: scale(1.15); }
+
+        .btn-review {
+            justify-self: start;
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            color: var(--bg); border: 0; border-radius: 8px;
+            padding: 10px 22px; font-family: var(--font-heading);
+            font-size: 14px; text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 600; cursor: pointer; transition: .3s;
+        }
+        .btn-review:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,160,23,0.3); }
+        .login-note { font-size: 13px; color: var(--gray-dim); padding: 8px 0; }
+        .login-note a { color: var(--gold); text-decoration: none; }
+        .login-note a:hover { text-decoration: underline; }
+
+        .actions-bar { padding: 0 40px 36px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-action {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 12px 28px; border-radius: 10px; text-decoration: none;
+            font-family: var(--font-heading); font-size: 15px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase; transition: .3s; border: none; cursor: pointer;
+        }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #b8860b); color: var(--bg); }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,160,23,0.3); color: var(--bg); }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--gray); }
+        .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+        .btn-red { background: transparent; border: 1px solid rgba(255,80,80,0.2); color: #ff6b6b; }
+        .btn-red:hover { background: rgba(255,80,80,0.1); border-color: rgba(255,80,80,0.5); }
+
+        .toast {
+            position: fixed; top: 80px; right: 24px; z-index: 100;
+            background: linear-gradient(135deg, #1a3a1a, #0d2a0d);
+            border: 1px solid rgba(80,200,80,0.3); border-radius: 10px;
+            padding: 14px 24px; color: #8bff8b;
+            font-family: var(--font-condensed); font-size: 14px; letter-spacing: 1px;
+            animation: toastIn .4s ease, toastOut .4s ease 3s forwards;
+        }
+        @@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+        @@media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; padding: 28px 20px 20px; }
+            .photo-section { flex: 0 0 auto; }
+            .flag-row { justify-content: center; }
+            .content-section, .actions-bar { padding-left: 20px; padding-right: 20px; }
+            .stats-grid { gap: 8px; }
+            .stat-num { font-size: 28px; }
+            .actions-bar { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="topbar">
+        <div class="topbar-links">
+            <a href="/" class="top-link">Home</a>
+            <a href="/Catalogo" class="top-link">Catalogo</a>
+        </div>
+        <div class="topbar-links">
+            @if (userId != null)
+            {
+                <a href="/Catalogo/Editar/@Model.Id" class="top-link">Editar</a>
+            }
+        </div>
+    </nav>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="toast">@TempData["Success"]</div>
+    }
+
+    <main class="page">
+        <div class="hero-card">
+            <div class="hero">
+                <div class="photo-section">
+                    <div class="photo-frame">
+                        @if (hasPhoto)
+                        {
+                            <img src="@photoSrc" alt="@Model.Nombre" loading="lazy" style="object-position: @photoPos;" />
+                        }
+                        else
+                        {
+                            <div class="photo-placeholder">
+                                <svg viewBox="0 0 100 160"><circle cx="50" cy="22" r="16"/><path d="M50 40 C28 40 20 65 20 82 L80 82 C80 65 72 40 50 40Z"/><rect x="24" y="82" width="18" height="48" rx="7"/><rect x="58" y="82" width="18" height="48" rx="7"/></svg>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="flag-row">
+                        <span class="flag">@Model.Bandera</span>
+                        <span class="country">@Model.Pais</span>
+                    </div>
+                    <h1 class="player-name">@Model.Nombre</h1>
+                    <div class="pos-badge">#@Model.NumeroCamiseta &bull; @Model.Posicion</div>
+
+                    @if (reviews.Any())
+                    {
+                        <div class="rating-display">
+                            <span class="rating-stars">@(new string('★', (int)Math.Round(avgRating)))</span>
+                            <span class="rating-text">@avgRating.ToString("F1") / 5 (@reviews.Count @(reviews.Count == 1 ? "review" : "reviews"))</span>
+                        </div>
+                    }
+
+                    <div class="specs">
+                        <div class="spec"><div class="spec-val">@Model.FechaNacimiento</div><div class="spec-lbl">Nacimiento</div></div>
+                        <div class="spec"><div class="spec-val">@Model.AlturaCm cm</div><div class="spec-lbl">Altura</div></div>
+                        <div class="spec"><div class="spec-val">@Model.PesoKg kg</div><div class="spec-lbl">Peso</div></div>
+                        <div class="spec"><div class="spec-val">#@Model.NumeroCamiseta</div><div class="spec-lbl">Camiseta</div></div>
+                        <div class="spec"><div class="spec-val">@Model.PieDominante</div><div class="spec-lbl">Pie</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="sec-title">Estadisticas</div>
+                <div class="stats-grid">
+                    <div class="stat"><div class="stat-num">@Model.Goles</div><div class="stat-name">Goles</div></div>
+                    <div class="stat"><div class="stat-num">@Model.Asistencias</div><div class="stat-name">Asistencias</div></div>
+                    <div class="stat"><div class="stat-num">@Model.Partidos</div><div class="stat-name">Partidos</div></div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="sec-title">Clubes</div>
+                <div class="clubs-list">
+                    @foreach (var club in (Model.Clubes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <span class="club-tag">@club.Trim()</span>
+                    }
+                </div>
+
+                <div class="sec-title">Biografia</div>
+                <p class="bio">@Model.Descripcion</p>
+
+                <div class="sec-title">Reviews (@reviews.Count)</div>
+                <div class="reviews-list">
+                    @if (!reviews.Any())
+                    {
+                        <p class="no-reviews">Sin comentarios todavia. Se el primero en opinar.</p>
+                    }
+                    @foreach (var review in reviews)
+                    {
+                        <div class="review-item">
+                            <div class="review-top">
+                                <span class="review-user">@review.UserName</span>
+                                <span class="review-stars">@(new string('★', review.Calificacion))</span>
+                            </div>
+                            <div class="review-text">@review.Comentario</div>
+                            <div class="review-date">@review.Fecha.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    }
+                </div>
+
+                @if (userId != null)
+                {
+                    <form class="review-form" method="post" asp-controller="Catalogo" asp-action="AgregarReview">
+                        <input type="hidden" name="itemId" value="@Model.Id" />
+                        <div class="rating-ctrl" aria-label="Calificacion">
+                            <input id="r5" type="radio" name="calificacion" value="5" checked /><label for="r5">&#9733;</label>
+                            <input id="r4" type="radio" name="calificacion" value="4" /><label for="r4">&#9733;</label>
+                            <input id="r3" type="radio" name="calificacion" value="3" /><label for="r3">&#9733;</label>
+                            <input id="r2" type="radio" name="calificacion" value="2" /><label for="r2">&#9733;</label>
+                            <input id="r1" type="radio" name="calificacion" value="1" /><label for="r1">&#9733;</label>
+                        </div>
+                        <textarea name="comentario" placeholder="Escribe tu opinion sobre este jugador..." required></textarea>
+                        <button type="submit" class="btn-review">Publicar Review</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="login-note">
+                        <a href="/Account/Login">Inicia sesion</a> para calificar y comentar.
+                    </p>
+                }
+            </div>
+
+            <div class="actions-bar">
+                <a href="/Catalogo" class="btn-action btn-gold">&#10094; Volver al catalogo</a>
+                @if (userId != null)
+                {
+                    <a href="/Catalogo/Editar/@Model.Id" class="btn-action btn-outline">Editar</a>
+                    <form method="post" asp-controller="Catalogo" asp-action="Eliminar" style="display:inline;"
+                          onsubmit="return confirm('Seguro que deseas eliminar a @Model.Nombre?');">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn-action btn-red">Eliminar</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

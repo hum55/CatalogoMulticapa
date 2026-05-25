@@ -1,0 +1,1014 @@
+﻿@{
+    ViewData["Title"] = "Home";
+    Layout = null;
+    int? userId = ViewBag.UserId as int?;
+    string userName = ViewBag.UserName as string ?? "";
+    string userRole = ViewBag.UserRole as string ?? "";
+    int totalJugadores = ViewBag.TotalJugadores as int? ?? 5;
+    int totalGoles = ViewBag.TotalGoles as int? ?? 3000;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo de Jugadores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@100;200;300;400&family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+            *, *::before, *::after {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            html {
+                scroll-behavior: smooth;
+            }
+
+            body {
+                font-family: 'Raleway', sans-serif;
+                overflow-x: hidden;
+                background: transparent;
+                color: #e8e4df;
+            }
+
+            .video-bg {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 0;
+            }
+
+                .video-bg video {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+            .video-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(10, 10, 15, 0.3);
+                z-index: 0;
+            }
+
+            /* ===== NAVBAR ===== */
+            .navbar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                z-index: 50;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px 40px;
+                background: linear-gradient(180deg, rgba(6,8,16,0.4) 0%, transparent 100%);
+                backdrop-filter: blur(4px);
+            }
+
+            .nav-left, .nav-right {
+                display: flex;
+                align-items: center;
+                gap: 28px;
+            }
+
+            .nav-link {
+                font-family: 'Raleway', sans-serif;
+                font-size: 11px;
+                font-weight: 300;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                color: rgba(228, 220, 210, 0.45);
+                text-decoration: none;
+                transition: all 0.3s ease;
+                padding: 4px 0;
+                position: relative;
+            }
+
+                .nav-link::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 0;
+                    height: 1px;
+                    background: rgba(212, 180, 80, 0.5);
+                    transition: width 0.3s ease;
+                }
+
+                .nav-link:hover {
+                    color: rgba(228, 220, 210, 0.85);
+                }
+
+                    .nav-link:hover::after {
+                        width: 100%;
+                    }
+
+                .nav-link.active {
+                    color: rgba(228, 220, 210, 0.7);
+                }
+
+                    .nav-link.active::after {
+                        width: 100%;
+                        background: rgba(212, 180, 80, 0.3);
+                    }
+
+            .nav-login {
+                border: 1px solid rgba(228, 220, 210, 0.15);
+                padding: 6px 18px;
+                letter-spacing: 2px;
+            }
+
+                .nav-login:hover {
+                    border-color: rgba(212, 180, 80, 0.4);
+                    background: rgba(212, 180, 80, 0.05);
+                }
+
+                .nav-login::after {
+                    display: none;
+                }
+
+            .nav-user {
+                color: rgba(212, 180, 80, 0.7);
+                font-size: 11px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+
+            /* ===== HERO ===== */
+            .hero {
+                position: relative;
+                z-index: 3;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 70px 40px 140px;
+                background: linear-gradient(180deg, rgba(10,10,15,0.55) 0%, rgba(10,10,15,0.75) 100%);
+            }
+
+            .title {
+                font-family: 'Josefin Sans', sans-serif;
+                font-size: clamp(32px, 6vw, 68px);
+                font-weight: 200;
+                letter-spacing: 6px;
+                line-height: 1.3;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+                text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+                animation: heroFadeDown 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .subtitle {
+                font-family: 'Raleway', sans-serif;
+                font-size: clamp(11px, 1.6vw, 13px);
+                font-weight: 300;
+                letter-spacing: 6px;
+                text-transform: uppercase;
+                color: rgba(228,220,210,0.5);
+                margin-bottom: 50px;
+                animation: heroFadeUp 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards;
+            }
+
+            .buttons {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-bottom: 40px;
+                animation: heroFadeUp 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+            }
+
+            .btn {
+                padding: 13px 44px;
+                font-family: 'Raleway', sans-serif;
+                font-size: 11px;
+                font-weight: 400;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                border: none;
+                cursor: pointer;
+                transition: all 0.4s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .btn--primary {
+                background: rgba(228,220,210,0.92);
+                color: #0a0a0f;
+            }
+
+                .btn--primary:hover {
+                    background: #fff;
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                }
+
+            .btn--secondary {
+                background: transparent;
+                color: rgba(228,220,210,0.85);
+                border: 1px solid rgba(228,220,210,0.3);
+            }
+
+                .btn--secondary:hover {
+                    background: rgba(228,220,210,0.92);
+                    color: #0a0a0f;
+                    border-color: transparent;
+                    transform: translateY(-2px);
+                }
+
+            .scroll-indicator {
+                position: absolute;
+                bottom: 25px;
+                left: 50%;
+                transform: translateX(-50%);
+                animation: bounce 2.5s ease-in-out infinite;
+                opacity: 0.35;
+            }
+
+                .scroll-indicator svg {
+                    width: 18px;
+                    height: 18px;
+                    stroke: #e8e4df;
+                    stroke-width: 1.5;
+                    fill: none;
+                }
+
+            /* ===== STRIP JUGADORES ===== */
+            .players-strip {
+                position: absolute;
+                bottom: 50px;
+                left: 0;
+                width: 100%;
+                height: 65px;
+                overflow: hidden;
+                pointer-events: none;
+                z-index: 4;
+            }
+
+            .strip-track {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 100px;
+                height: 100%;
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
+            .strip-player {
+                width: 45px;
+                height: 60px;
+                flex-shrink: 0;
+            }
+
+            /* ===== RANURA VIDEO ===== */
+            .video-gap {
+                position: relative;
+                z-index: 1;
+                height: 120px;
+            }
+
+            .section-block {
+                position: relative;
+                z-index: 3;
+            }
+
+            /* ===== REVEAL ===== */
+            .reveal {
+                opacity: 0;
+                transform: translateY(40px);
+                transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+                .reveal.visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+            .reveal-stagger {
+                opacity: 0;
+                transform: translateY(30px);
+                transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+                .reveal-stagger.visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+            /* ===== TÍTULOS ===== */
+            .section-title {
+                font-family: 'Josefin Sans', sans-serif;
+                font-size: clamp(28px, 4vw, 48px);
+                font-weight: 200;
+                letter-spacing: 6px;
+                text-align: center;
+                margin-bottom: 16px;
+                color: #e8e4df;
+                text-transform: uppercase;
+            }
+
+            .title-line {
+                width: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(228,220,210,0.3), transparent);
+                margin: 0 auto 60px;
+                transition: width 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+            }
+
+                .title-line.visible {
+                    width: 80px;
+                }
+
+            /* ===== STATS ===== */
+            .stats-section {
+                padding: 100px 40px;
+                background: rgba(10, 10, 18, 0.92);
+                backdrop-filter: blur(12px);
+            }
+
+            .stats-container {
+                max-width: 900px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 40px;
+            }
+
+            .stat-card {
+                text-align: center;
+            }
+
+            .stat-number {
+                font-family: 'Josefin Sans', sans-serif;
+                font-size: clamp(40px, 5vw, 60px);
+                font-weight: 200;
+                color: rgba(228,220,210,0.75);
+                margin-bottom: 10px;
+                line-height: 1;
+                letter-spacing: 2px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+                letter-spacing: 4px;
+                text-transform: uppercase;
+                font-weight: 300;
+                color: rgba(228,220,210,0.3);
+            }
+
+            /* ===== JUGADORES ===== */
+            .players-section {
+                padding: 100px 40px;
+                background: rgba(8, 8, 16, 0.93);
+                backdrop-filter: blur(12px);
+            }
+
+            .home-players-grid {
+                max-width: 1000px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: center;
+                gap: 45px;
+                flex-wrap: wrap;
+            }
+
+            .home-player-card {
+                text-align: center;
+                width: 140px;
+                cursor: default;
+            }
+
+                .home-player-card:hover {
+                    transform: translateY(-5px);
+                    transition: transform 0.3s ease;
+                }
+
+            .home-player-name {
+                font-family: 'Josefin Sans', sans-serif;
+                font-size: 16px;
+                font-weight: 300;
+                color: #e8e4df;
+                margin-bottom: 4px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+
+            .home-player-position {
+                font-size: 9px;
+                letter-spacing: 3px;
+                color: rgba(228,220,210,0.35);
+                text-transform: uppercase;
+                font-weight: 300;
+                margin-bottom: 14px;
+            }
+
+            .home-player-flag {
+                width: 48px;
+                height: 30px;
+                margin: 0 auto;
+                border-radius: 3px;
+                overflow: hidden;
+                transition: all 0.4s ease;
+            }
+
+                .home-player-flag img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                }
+
+            .home-player-card:hover .home-player-flag {
+                transform: scale(1.08);
+            }
+
+            /* ===== CLUBES ===== */
+            .clubs-section {
+                padding: 100px 40px;
+                background: rgba(12, 10, 20, 0.93);
+                backdrop-filter: blur(12px);
+            }
+
+            .clubs-grid {
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+
+            .club-row {
+                display: grid;
+                grid-template-columns: 200px 1fr;
+                gap: 40px;
+                align-items: center;
+                padding: 35px 0;
+                border-bottom: 1px solid rgba(228,220,210,0.05);
+                transition: border-color 0.4s ease;
+            }
+
+                .club-row:hover {
+                    border-bottom-color: rgba(228,220,210,0.15);
+                }
+
+                .club-row:last-child {
+                    border-bottom: none;
+                }
+
+            .club-left {
+                text-align: center;
+            }
+
+            .club-badge {
+                width: 80px;
+                height: 80px;
+                margin: 0 auto 14px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(228,220,210,0.08);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 14px;
+                transition: all 0.5s ease;
+            }
+
+                .club-badge img {
+                    max-width: 100%;
+                    max-height: 100%;
+                    object-fit: contain;
+                    display: block;
+                    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+                }
+
+                .club-badge.glow {
+                    border-color: rgba(228,220,210,0.2);
+                    background: rgba(255,255,255,0.06);
+                    box-shadow: 0 0 25px rgba(228,220,210,0.06);
+                }
+
+            .club-row:hover .club-badge {
+                transform: scale(1.1);
+                border-color: rgba(228,220,210,0.25);
+                background: rgba(255,255,255,0.07);
+            }
+
+            .club-name {
+                font-size: 12px;
+                font-weight: 300;
+                color: rgba(228,220,210,0.4);
+                letter-spacing: 2px;
+            }
+
+            .club-right {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .club-player-name {
+                font-size: 10px;
+                font-weight: 400;
+                letter-spacing: 4px;
+                text-transform: uppercase;
+                color: rgba(228,220,210,0.3);
+            }
+
+            .club-achievement {
+                font-family: 'Josefin Sans', sans-serif;
+                font-size: 24px;
+                font-weight: 200;
+                color: #e8e4df;
+                line-height: 1.4;
+                letter-spacing: 1px;
+            }
+
+            .club-detail {
+                font-size: 12px;
+                font-weight: 300;
+                color: rgba(228,220,210,0.3);
+                line-height: 1.8;
+                letter-spacing: 0.3px;
+            }
+
+            /* ===== CTA ===== */
+            .cta-section {
+                padding: 100px 40px;
+                text-align: center;
+                background: rgba(10,10,15,0.92);
+                backdrop-filter: blur(12px);
+            }
+
+                .cta-section h2 {
+                    font-family: 'Josefin Sans', sans-serif;
+                    font-size: clamp(28px, 4vw, 44px);
+                    font-weight: 200;
+                    letter-spacing: 6px;
+                    text-transform: uppercase;
+                    margin-bottom: 35px;
+                }
+
+            .cta-btn {
+                display: inline-flex;
+                padding: 13px 50px;
+                background: rgba(228,220,210,0.92);
+                color: #0a0a0f;
+                font-family: 'Raleway', sans-serif;
+                font-size: 11px;
+                font-weight: 400;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                border: none;
+                cursor: pointer;
+                transition: all 0.4s ease;
+                text-decoration: none;
+            }
+
+                .cta-btn:hover {
+                    transform: translateY(-2px);
+                    background: #fff;
+                    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+                }
+
+            /* ===== KEYFRAMES ===== */
+            @@keyframes heroFadeDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @@keyframes heroFadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @@keyframes bounce {
+                0%, 100% {
+                    transform: translateX(-50%) translateY(0);
+                }
+
+                50% {
+                    transform: translateX(-50%) translateY(8px);
+                }
+            }
+
+            /* ===== RESPONSIVE ===== */
+            @@media (max-width: 768px) {
+                .navbar {
+                    padding: 12px 20px;
+                }
+
+                .nav-left, .nav-right {
+                    gap: 16px;
+                }
+
+                .nav-link {
+                    font-size: 9px;
+                    letter-spacing: 2px;
+                }
+
+                .hero {
+                    padding: 60px 20px 130px;
+                }
+
+                .title {
+                    font-size: clamp(28px, 6vw, 44px);
+                    letter-spacing: 4px;
+                }
+
+                .buttons {
+                    gap: 14px;
+                    flex-direction: column;
+                    width: 100%;
+                    max-width: 280px;
+                    margin-bottom: 30px;
+                }
+
+                .btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .video-gap {
+                    height: 80px;
+                }
+
+                .stats-section, .players-section, .clubs-section, .cta-section {
+                    padding: 70px 20px;
+                }
+
+                .home-players-grid {
+                    gap: 25px;
+                }
+
+                .home-player-card {
+                    width: 110px;
+                }
+
+                .club-row {
+                    grid-template-columns: 1fr;
+                    text-align: center;
+                    gap: 16px;
+                }
+
+                .club-right {
+                    align-items: center;
+                    text-align: center;
+                }
+
+                .club-achievement {
+                    font-size: 20px;
+                }
+            }
+
+            @@media (max-width: 480px) {
+                .video-gap {
+                    height: 60px;
+                }
+
+                .stats-container {
+                    grid-template-columns: 1fr;
+                    gap: 25px;
+                }
+
+                .home-players-grid {
+                    gap: 16px;
+                }
+
+                .home-player-card {
+                    width: 90px;
+                }
+
+                .home-player-name {
+                    font-size: 13px;
+                }
+
+                .home-player-flag {
+                    width: 38px;
+                    height: 24px;
+                }
+            }
+    </style>
+</head>
+<body>
+
+    <div class="video-bg">
+        <video autoplay muted loop playsinline>
+            <source src="/videos/11918917-hd_1920_1080_60fps.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="video-overlay"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="nav-link active">Home</a>
+            <a href="/Home/Privacy" class="nav-link">Privacy</a>
+        </div>
+        <div class="nav-right">
+            @if (userId != null)
+            {
+                <span class="nav-user">@userName</span>
+                <a href="/Account/Logout" class="nav-link nav-login">Salir</a>
+            }
+            else
+            {
+                <a href="/Account/Register" class="nav-link">Registro</a>
+                <a href="/Account/Login" class="nav-link nav-login">Login</a>
+            }
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1 class="title">Los Mejores Jugadores de la Historia</h1>
+        <p class="subtitle">Explora las leyendas del fútbol</p>
+        <div class="buttons">
+            <a href="/Catalogo" class="btn btn--primary">Ver Catálogo</a>
+            <a href="/Catalogo/Agregar" class="btn btn--secondary">Agregar Jugador</a>
+        </div>
+
+        <!-- STRIP JUGADORES ANIMADOS -->
+        <div class="players-strip">
+            <div class="strip-track" id="stripTrack"></div>
+        </div>
+
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M19 18l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </div>
+    </section>
+
+    <div class="video-gap"></div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="section-block">
+        <section class="stats-section">
+            <div class="stats-container">
+                <div class="stat-card reveal">
+                    <div class="stat-number" data-target="@totalJugadores">0</div>
+                    <div class="stat-label">Leyendas</div>
+                </div>
+                <div class="stat-card reveal">
+                    <div class="stat-number" data-target="@totalGoles" data-suffix="+">0</div>
+                    <div class="stat-label">Goles Combinados</div>
+                </div>
+                <div class="stat-card reveal">
+                    <div class="stat-number" data-target="100" data-suffix="+">0</div>
+                    <div class="stat-label">Años de Historia</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="video-gap"></div>
+
+    <!-- JUGADORES -->
+    <div class="section-block">
+        <section class="players-section">
+            <h2 class="section-title reveal">Los Cinco Mejores</h2>
+            <div class="title-line"></div>
+            <div class="home-players-grid">
+                <div class="home-player-card reveal-stagger">
+                    <div class="home-player-name">Messi</div>
+                    <div class="home-player-position">Delantero</div>
+                    <div class="home-player-flag"><img src="/imagenes/OIP.webp" alt="Argentina"></div>
+                </div>
+                <div class="home-player-card reveal-stagger">
+                    <div class="home-player-name">Cristiano</div>
+                    <div class="home-player-position">Delantero</div>
+                    <div class="home-player-flag"><img src="/imagenes/bandera-nacional-portugal-fondo-bandera-portugal_659987-22837.avif" alt="Portugal"></div>
+                </div>
+                <div class="home-player-card reveal-stagger">
+                    <div class="home-player-name">Neymar</div>
+                    <div class="home-player-position">Extremo</div>
+                    <div class="home-player-flag"><img src="/imagenes/br.png" alt="Brasil"></div>
+                </div>
+                <div class="home-player-card reveal-stagger">
+                    <div class="home-player-name">Mbappé</div>
+                    <div class="home-player-position">Delantero</div>
+                    <div class="home-player-flag"><img src="/imagenes/fr.png" alt="Francia"></div>
+                </div>
+                <div class="home-player-card reveal-stagger">
+                    <div class="home-player-name">Salah</div>
+                    <div class="home-player-position">Extremo</div>
+                    <div class="home-player-flag"><img src="/imagenes/ago_downloaded.png" alt="Egipto"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="video-gap"></div>
+
+    <!-- CLUBES -->
+    <div class="section-block">
+        <section class="clubs-section">
+            <h2 class="section-title reveal">Donde Hicieron Historia</h2>
+            <div class="title-line"></div>
+            <div class="clubs-grid">
+                <div class="club-row reveal">
+                    <div class="club-left">
+                        <div class="club-badge"><img src="/imagenes/Fcbarcelona.png" alt="FC Barcelona"></div>
+                        <div class="club-name">FC Barcelona</div>
+                    </div>
+                    <div class="club-right">
+                        <div class="club-player-name">Lionel Messi</div>
+                        <div class="club-achievement">672 goles en 778 partidos</div>
+                        <div class="club-detail">Máximo goleador histórico del club. Ganó 4 Champions League, 10 Ligas y 7 Copas del Rey.</div>
+                    </div>
+                </div>
+                <div class="club-row reveal">
+                    <div class="club-left">
+                        <div class="club-badge"><img src="/imagenes/escudo-del-real-madrid-11551060158j7jgejcdbu.png" alt="Real Madrid"></div>
+                        <div class="club-name">Real Madrid</div>
+                    </div>
+                    <div class="club-right">
+                        <div class="club-player-name">Cristiano Ronaldo</div>
+                        <div class="club-achievement">451 goles en 438 partidos</div>
+                        <div class="club-detail">Máximo goleador histórico del club. Ganó 4 Champions League, 2 Ligas y 2 Copas del Rey.</div>
+                    </div>
+                </div>
+                <div class="club-row reveal">
+                    <div class="club-left">
+                        <div class="club-badge"><img src="/imagenes/Santos-FC-Background-PNG-Image.png" alt="Santos FC"></div>
+                        <div class="club-name">Santos FC</div>
+                    </div>
+                    <div class="club-right">
+                        <div class="club-player-name">Neymar Jr</div>
+                        <div class="club-achievement">136 goles en 225 partidos</div>
+                        <div class="club-detail">Campeón de la Copa Libertadores 2011 con solo 19 años. Heredero de Pelé en el club.</div>
+                    </div>
+                </div>
+                <div class="club-row reveal">
+                    <div class="club-left">
+                        <div class="club-badge"><img src="/imagenes/vinilos-decorativos-escudo-paris-saint-germain-psg-color.png" alt="PSG"></div>
+                        <div class="club-name">Paris Saint-Germain</div>
+                    </div>
+                    <div class="club-right">
+                        <div class="club-player-name">Kylian Mbappé</div>
+                        <div class="club-achievement">256 goles en 308 partidos</div>
+                        <div class="club-detail">Máximo goleador histórico del club superando a Cavani. Ganó 6 Ligas consecutivas.</div>
+                    </div>
+                </div>
+                <div class="club-row reveal">
+                    <div class="club-left">
+                        <div class="club-badge"><img src="/imagenes/R.png" alt="Liverpool FC"></div>
+                        <div class="club-name">Liverpool FC</div>
+                    </div>
+                    <div class="club-right">
+                        <div class="club-player-name">Mohamed Salah</div>
+                        <div class="club-achievement">221 goles en 367 partidos</div>
+                        <div class="club-detail">Campeón de la Champions League 2019 y la Premier League 2020. Ídolo de Anfield.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="video-gap"></div>
+
+    <!-- CTA -->
+    <div class="section-block">
+        <section class="cta-section">
+            <h2 class="reveal">Comenzar a Explorar</h2>
+            <div class="reveal" style="transition-delay: 0.15s;">
+                <a href="/Catalogo" class="cta-btn">Ir al Catálogo</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+            // ===== STRIP DE JUGADORES =====
+            (function() {
+                const track = document.getElementById('stripTrack');
+                const poses = [
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="22" cy="10" r="7"/><line x1="22" y1="17" x2="26" y2="40"/><line x1="24" y1="26" x2="12" y2="35"/><line x1="24" y1="26" x2="38" y2="30"/><line x1="26" y1="40" x2="16" y2="60"/><line x1="26" y1="40" x2="40" y2="56"/><circle cx="44" cy="56" r="4" stroke-width="1.5"/></svg>',
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="10" r="7"/><line x1="20" y1="17" x2="24" y2="40"/><line x1="22" y1="26" x2="8" y2="32"/><line x1="22" y1="26" x2="36" y2="22"/><line x1="24" y1="40" x2="14" y2="60"/><line x1="24" y1="40" x2="44" y2="34"/><line x1="44" y1="34" x2="52" y2="26"/><circle cx="55" cy="22" r="4" stroke-width="1.5"/></svg>',
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="30" cy="14" r="7"/><circle cx="30" cy="4" r="3.5" stroke-width="1.5"/><line x1="30" y1="21" x2="30" y2="44"/><line x1="30" y1="30" x2="16" y2="38"/><line x1="30" y1="30" x2="44" y2="38"/><line x1="30" y1="44" x2="22" y2="64"/><line x1="30" y1="44" x2="38" y2="64"/></svg>',
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="30" cy="10" r="7"/><line x1="30" y1="17" x2="28" y2="42"/><line x1="29" y1="26" x2="14" y2="28"/><line x1="14" y1="28" x2="10" y2="38"/><line x1="29" y1="26" x2="44" y2="30"/><line x1="28" y1="42" x2="18" y2="60"/><line x1="28" y1="42" x2="40" y2="58"/><circle cx="12" cy="42" r="4" stroke-width="1.5"/></svg>',
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="30" cy="10" r="7"/><line x1="30" y1="17" x2="30" y2="42"/><line x1="30" y1="24" x2="16" y2="12"/><line x1="30" y1="24" x2="44" y2="12"/><line x1="30" y1="42" x2="22" y2="62"/><line x1="30" y1="42" x2="38" y2="62"/></svg>',
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="36" cy="32" r="7"/><line x1="36" y1="39" x2="26" y2="50"/><line x1="30" y1="44" x2="14" y2="40"/><line x1="30" y1="44" x2="18" y2="54"/><line x1="26" y1="50" x2="40" y2="58"/><line x1="26" y1="50" x2="10" y2="54"/><circle cx="46" cy="22" r="4" stroke-width="1.5"/><line x1="40" y1="58" x2="50" y2="26"/></svg>',
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="28" cy="10" r="7"/><line x1="28" y1="17" x2="32" y2="42"/><line x1="30" y1="26" x2="46" y2="28"/><line x1="30" y1="26" x2="16" y2="34"/><line x1="32" y1="42" x2="22" y2="62"/><line x1="32" y1="42" x2="46" y2="56"/><circle cx="50" cy="54" r="4" stroke-width="1.5"/></svg>',
+                    '<svg viewBox="0 0 60 80" fill="none" stroke="rgba(228,220,210,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="30" cy="10" r="7"/><line x1="30" y1="17" x2="30" y2="42"/><line x1="30" y1="24" x2="8" y2="20"/><line x1="30" y1="24" x2="52" y2="20"/><line x1="30" y1="42" x2="20" y2="60"/><line x1="30" y1="42" x2="40" y2="60"/><circle cx="6" cy="16" r="4" stroke-width="1.5"/></svg>'
+                ];
+                for (let set = 0; set < 3; set++) {
+                    poses.forEach(function(svg) {
+                        const div = document.createElement('div');
+                        div.className = 'strip-player';
+                        div.innerHTML = svg;
+                        track.appendChild(div);
+                    });
+                }
+                let pos = 0;
+                const speed = 0.8;
+                function animate() {
+                    pos -= speed;
+                    const oneSetWidth = track.scrollWidth / 3;
+                    if (Math.abs(pos) >= oneSetWidth) pos += oneSetWidth;
+                    track.style.transform = 'translateX(' + pos + 'px)';
+                    requestAnimationFrame(animate);
+                }
+                requestAnimationFrame(animate);
+            })();
+
+            // ===== REVEAL =====
+            const revealObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+            }, { threshold: 0.15 });
+            document.querySelectorAll('.reveal').forEach(function(el) { revealObs.observe(el); });
+
+            // ===== STAGGER =====
+            const staggerObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(e) {
+                    if (e.isIntersecting) {
+                        e.target.querySelectorAll('.reveal-stagger').forEach(function(c, i) {
+                            setTimeout(function() { c.classList.add('visible'); }, i * 120);
+                        });
+                        staggerObs.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.2 });
+            document.querySelectorAll('.home-players-grid').forEach(function(g) { staggerObs.observe(g); });
+
+            // ===== LÍNEAS =====
+            const lineObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+            }, { threshold: 0.5 });
+            document.querySelectorAll('.title-line').forEach(function(l) { lineObs.observe(l); });
+
+            // ===== CONTADOR =====
+            var counterDone = false;
+            var counterObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(e) {
+                    if (e.isIntersecting && !counterDone) {
+                        counterDone = true;
+                        document.querySelectorAll('.stat-number[data-target]').forEach(function(num) {
+                            var target = parseInt(num.getAttribute('data-target'));
+                            var suffix = num.getAttribute('data-suffix') || '';
+                            var duration = 2000, start = performance.now();
+                            function upd(now) {
+                                var p = Math.min((now - start) / duration, 1);
+                                var eased = 1 - Math.pow(1 - p, 4);
+                                num.textContent = (target >= 1000 ? Math.round(eased * target).toLocaleString() : Math.round(eased * target)) + suffix;
+                                if (p < 1) requestAnimationFrame(upd);
+                            }
+                            requestAnimationFrame(upd);
+                        });
+                    }
+                });
+            }, { threshold: 0.3 });
+            document.querySelectorAll('.stats-section').forEach(function(s) { counterObs.observe(s); });
+
+            // ===== GLOW =====
+            var glowObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(e) {
+                    if (e.isIntersecting) { var b = e.target.querySelector('.club-badge'); if (b) b.classList.add('glow'); }
+                });
+            }, { threshold: 0.3 });
+            document.querySelectorAll('.club-row').forEach(function(r) { glowObs.observe(r); });
+
+            // ===== PARALLAX =====
+            var vid = document.querySelector('.video-bg video');
+            window.addEventListener('scroll', function() {
+                if (vid) vid.style.transform = 'translateY(' + (window.scrollY * 0.15) + 'px)';
+            }, { passive: true });
+
+            // ===== TYPEWRITER =====
+            var achObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(e) {
+                    if (e.isIntersecting) {
+                        var el = e.target, txt = el.textContent;
+                        el.textContent = ''; el.style.opacity = '1';
+                        var i = 0;
+                        var iv = setInterval(function() { el.textContent = txt.substring(0, ++i); if (i >= txt.length) clearInterval(iv); }, 25);
+                        achObs.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.5 });
+            document.querySelectorAll('.club-achievement').forEach(function(el) { el.style.opacity = '0'; achObs.observe(el); });
+    </script>
+
+</body>
+</html>

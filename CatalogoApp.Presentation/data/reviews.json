@@ -1,0 +1,47 @@
+[
+  {
+    "Id": 1,
+    "ItemId": 1,
+    "UserId": 1,
+    "UserName": "Jorge Pedrozo",
+    "Calificacion": 5,
+    "Comentario": "Jugador increible, muy completo y decisivo.",
+    "Fecha": "2026-05-24T00:00:00"
+  },
+  {
+    "Id": 2,
+    "ItemId": 2,
+    "UserId": 2,
+    "UserName": "Javier",
+    "Calificacion": 5,
+    "Comentario": "Una maquina de goles y mentalidad ganadora.",
+    "Fecha": "2026-05-24T00:00:00"
+  },
+  {
+    "Id": 3,
+    "ItemId": 1,
+    "UserId": 3,
+    "UserName": "hu",
+    "Calificacion": 3,
+    "Comentario": "MEJORRRRRRRRRRRRR",
+    "Fecha": "2026-05-24T08:13:14.7474446-06:00"
+  },
+  {
+    "Id": 4,
+    "ItemId": 1,
+    "UserId": 4,
+    "UserName": "humbert",
+    "Calificacion": 5,
+    "Comentario": "mejor de todo el mundo",
+    "Fecha": "2026-05-24T08:16:21.2506736-06:00"
+  },
+  {
+    "Id": 5,
+    "ItemId": 2,
+    "UserId": 4,
+    "UserName": "humbert",
+    "Calificacion": 2,
+    "Comentario": "bueno",
+    "Fecha": "2026-05-24T08:27:27.6958931-06:00"
+  }
+]

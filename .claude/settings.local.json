@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(dotnet build \"C:\\\\Users\\\\hr432\\\\source\\\\repos\\\\CatalogoMulticapa\" 2>&1)",
+      "PowerShell(Start-Sleep -Seconds 4; try { Invoke-WebRequest -Uri \"http://127.0.0.1:5006\" -UseBasicParsing -TimeoutSec 5 | Select-Object StatusCode } catch { $_.Exception.Message })",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:5005\" -UseBasicParsing -TimeoutSec 5; \"Status: $\\($r.StatusCode\\) - Length: $\\($r.Content.Length\\)\" } catch { $_.Exception.Message })",
+      "PowerShell($session = New-Object Microsoft.PowerShell.Commands.WebRequestSession; $body = \"email=hr4320352@gmail.com&password=123\"; try { $loginPage = Invoke-WebRequest -Uri \"http://localhost:5005/Account/Login\" -UseBasicParsing -WebSession $session -TimeoutSec 5; $token = \\($loginPage.InputFields | Where-Object { $_.name -eq '__RequestVerificationToken' }\\).value; $bodyWithToken = \"$body&__RequestVerificationToken=$token\"; $r = Invoke-WebRequest -Uri \"http://localhost:5005/Account/Login\" -Method POST -UseBasicParsing -WebSession $session -Body $bodyWithToken -ContentType \"application/x-www-form-urlencoded\" -MaximumRedirection 0 -TimeoutSec 5; \"Login status: $\\($r.StatusCode\\)\" } catch { if \\($_.Exception.Response\\) { $status = [int]$_.Exception.Response.StatusCode; $loc = $_.Exception.Response.Headers[\"Location\"]; \"Login response: $status -> $loc\" } else { $_.Exception.Message } })",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5005 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue; \"Killed PID $\\($_.OwningProcess\\) on port 5005\" }; Get-NetTCPConnection -LocalPort 7128 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue; \"Killed PID $\\($_.OwningProcess\\) on port 7128\" }; \"Ports cleared\")"
+    ]
+  }
+}
