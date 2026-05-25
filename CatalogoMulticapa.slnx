@@ -3,4 +3,12 @@
   <Project Path="CatalogoApp.Domain/CatalogoApp.Domain.csproj" />
   <Project Path="CatalogoApp.Infrastructure/CatalogoApp.Infrastructure.csproj" />
   <Project Path="CatalogoApp.Presentation/CatalogoApp.Presentation.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+    <File Path="screenshot-home.png" />
+    <File Path="screenshot-catalogo.png" />
+    <File Path="screenshot-detalle.png" />
+    <File Path="screenshot-login.png" />
+    <File Path="screenshot-registro.png" />
+  </Folder>
 </Solution>
