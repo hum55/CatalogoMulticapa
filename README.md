@@ -111,7 +111,7 @@ Este proyecto fue desarrollado con asistencia de herramientas de inteligencia ar
 
 ## Autor
 
-**Humberto Ramirez Gruintal**
+**Humberto Ramirez Gruintalme**
 
 ---
 
